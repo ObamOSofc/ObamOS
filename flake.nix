@@ -1,5 +1,4 @@
-cat <<'EOF' > flake.nix
-{
+printf '{
   description = "ObamOS System Builder";
 
   inputs = {
@@ -18,4 +17,4 @@ cat <<'EOF' > flake.nix
     };
   };
 }
-EOF
+' > flake.nix
