@@ -13,6 +13,7 @@
         coreutils
         findutils
         gnugrep
+	hyprland
       ];
     };
   };
