@@ -1,4 +1,4 @@
-printf '{
+{
   description = "ObamOS System Builder";
 
   inputs = {
@@ -17,4 +17,3 @@ printf '{
     };
   };
 }
-' > flake.nix
