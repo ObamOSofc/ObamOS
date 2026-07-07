@@ -9,12 +9,11 @@
     nixosConfigurations.obamos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        # Use a minimal profile instead of the full installer
         "${nixpkgs}/nixos/modules/profiles/all-hardware.nix"
         {
           system.stateVersion = "26.11";
           
-          # 1. Branding & Identity
+          # Branding
           networking.hostName = "obamos";
           environment.etc."os-release".text = ''
             NAME="ObamOS"
@@ -23,16 +22,16 @@
             VERSION="1.0"
           '';
 
-          # 2. Shell & Prompt
+          # Shell Prompt
           environment.interactiveShellInit = ''
             export PS1="ObamOS \w \$ "
           '';
 
-          # 3. Security: Require Password (No Autologin)
+          # Security/Login
           services.getty.autologinUser = null;
-          users.users.root.initialHashedPassword = ""; # Empty for now, but you can set a custom one
+          users.users.root.initialHashedPassword = "";
 
-          # 4. Minimal System
+          # Base System
           boot.plymouth.enable = false;
           services.xserver.enable = false;
           
@@ -43,5 +42,8 @@
         }
       ];
     };
+
+    # Build shortcut
+    packages.x86_64-linux.iso = self.nixosConfigurations.obamos.config.system.build.isoImage;
   };
 }
