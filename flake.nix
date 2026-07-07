@@ -39,7 +39,7 @@
           # --- 2. System Packages & Theme Dependencies ---
           environment.systemPackages = with pkgs; [
             dialog git parted util-linux 
-            hyprland waybar kitty rofi-wayland swaynotificationcenter 
+            hyprland waybar kitty rofi
             brightnessctl pipewire wireplumber networkmanagerapplet
             (writeScriptBin "obamos-install.sh" (builtins.readFile ./obamos-install.sh))
           ];
