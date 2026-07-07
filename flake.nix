@@ -9,6 +9,8 @@
     nixosConfigurations.obamos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
+        # Include necessary modules to build an ISO
+        "${nixpkgs}/nixos/modules/installer/cd-dvd/iso-image.nix"
         "${nixpkgs}/nixos/modules/profiles/all-hardware.nix"
         {
           system.stateVersion = "26.11";
@@ -27,7 +29,7 @@
             export PS1="ObamOS \w \$ "
           '';
 
-          # Security/Login
+          # Security
           services.getty.autologinUser = null;
           users.users.root.initialHashedPassword = "";
 
@@ -39,6 +41,9 @@
             bashInteractive
             coreutils
           ];
+          
+          # Tell Nix to build an ISO
+          isoImage.isoName = "obamos.iso";
         }
       ];
     };
