@@ -14,10 +14,10 @@
         {
           system.stateVersion = "26.11";
           
-          # Branding Overrides
+          # Core Identity
           networking.hostName = "obamos";
           
-          # Force overwrite of os-release
+          # Overwrite /etc/os-release completely
           environment.etc."os-release" = {
             text = ''
               NAME="ObamOS"
@@ -27,9 +27,14 @@
             '';
           };
 
-          # Override version information
-          system.nixos.label = "obamos-1.0";
-          system.nixos.version = "1.0";
+          # Clear the "Welcome to NixOS" banner
+          environment.etc."issue".text = ''
+            Welcome to ObamOS 1.0
+          '';
+
+          # Silence NixOS-specific getty banners
+          services.getty.helpLine = "Welcome to ObamOS 1.0";
+          services.getty.greetingLine = " ";
 
           # Shell Prompt
           environment.interactiveShellInit = ''
