@@ -1,5 +1,5 @@
 {
-  description = "ObamOS - The Custom OS with Hyprland";
+  description = "ObamOS - The Custom OS";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -13,7 +13,7 @@
         "${nixpkgs}/nixos/modules/installer/cd-dvd/iso-image.nix"
         "${nixpkgs}/nixos/modules/profiles/all-hardware.nix"
         hyprland.nixosModules.default
-        {
+        ({ pkgs, ... }: {
           system.stateVersion = "26.11";
           
           # Branding
@@ -25,25 +25,25 @@
             VERSION="1.0"
           '';
 
+          # Fix the small font in TTY
+          console.font = "Lat2-Terminus16";
+          
           # Graphics & Desktop
           programs.hyprland.enable = true;
           services.xserver.videoDrivers = [ "modesetting" ];
           
-          # Wayland Support
-          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            kitty        # Terminal
-            waybar       # Status bar
-            wofi         # App launcher
-            dolphin      # File manager
+          # Fixed Package List
+          environment.systemPackages = [
+            pkgs.kitty
+            pkgs.waybar
+            pkgs.wofi
+            pkgs.kdePackages.dolphin
           ];
 
           # Security
           services.getty.autologinUser = null;
           users.users.root.initialHashedPassword = "";
-
-          # Bootloader
-          boot.loader.grub.configurationName = "ObamOS";
-        }
+        })
       ];
     };
 
