@@ -9,20 +9,27 @@
     nixosConfigurations.obamos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
-        # Include necessary modules to build an ISO
         "${nixpkgs}/nixos/modules/installer/cd-dvd/iso-image.nix"
         "${nixpkgs}/nixos/modules/profiles/all-hardware.nix"
         {
           system.stateVersion = "26.11";
           
-          # Branding
+          # Branding Overrides
           networking.hostName = "obamos";
-          environment.etc."os-release".text = ''
-            NAME="ObamOS"
-            ID=obamos
-            PRETTY_NAME="ObamOS 1.0"
-            VERSION="1.0"
-          '';
+          
+          # Force overwrite of os-release
+          environment.etc."os-release" = {
+            text = ''
+              NAME="ObamOS"
+              ID=obamos
+              PRETTY_NAME="ObamOS 1.0"
+              VERSION="1.0"
+            '';
+          };
+
+          # Override version information
+          system.nixos.label = "obamos-1.0";
+          system.nixos.version = "1.0";
 
           # Shell Prompt
           environment.interactiveShellInit = ''
@@ -36,19 +43,10 @@
           # Base System
           boot.plymouth.enable = false;
           services.xserver.enable = false;
-          
-          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
-            bashInteractive
-            coreutils
-          ];
-          
-          # Tell Nix to build an ISO
-          isoImage.isoName = "obamos.iso";
         }
       ];
     };
 
-    # Build shortcut
     packages.x86_64-linux.iso = self.nixosConfigurations.obamos.config.system.build.isoImage;
   };
 }
