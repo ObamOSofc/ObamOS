@@ -10,7 +10,7 @@
       system = "x86_64-linux";
       modules = [
         "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-        ({ pkgs, ... }: {
+        ({ pkgs, lib, ... }: {
           system.stateVersion = "26.11";
           networking.hostName = "obamos";
           
@@ -36,7 +36,7 @@
             }) ];
           };
 
-          # --- 2. System Packages & Theme Dependencies ---
+          # --- 2. System Packages ---
           environment.systemPackages = with pkgs; [
             dialog git parted util-linux 
             hyprland waybar kitty rofi
@@ -48,7 +48,9 @@
           services.displayManager.sddm = { enable = true; wayland.enable = true; };
           programs.hyprland.enable = true;
           
-          services.getty.autologinUser = "root";
+          # FIX: Force the root login to override the installer profile
+          services.getty.autologinUser = lib.mkForce "root";
+          
           environment.interactiveShellInit = ''
             if [ "$XDG_VTNR" = 1 ]; then /run/current-system/sw/bin/obamos-install.sh; fi
           '';
@@ -60,7 +62,6 @@
       ];
     };
 
-    # This allows you to run 'nix build' without specifying the long path
     packages.x86_64-linux.default = self.nixosConfigurations.obamos.config.system.build.isoImage;
   };
 }
