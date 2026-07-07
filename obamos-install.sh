@@ -1,49 +1,56 @@
 #!/usr/bin/env bash
 # ObamOS Professional TUI Installer
 
-# Ensure dialog is available
 if ! command -v dialog &> /dev/null; then nix-env -iA nixpkgs.dialog; fi
 
-HEIGHT=15
-WIDTH=50
+HEIGHT=15; WIDTH=50
 
-# --- Function: Partitioning ---
+# Partitioning
 partition_menu() {
-    choice=$(dialog --menu "Disk Partitioning" $HEIGHT $WIDTH 4 \
-        1 "Auto-format drive (GPT)" \
+    choice=$(dialog --menu "Disk Partitioning" $HEIGHT $WIDTH 3 \
+        1 "Auto-format drive (GPT + EFI)" \
         2 "Manual partition" 3>&1 1>&2 2>&3 3>&-)
     
     if [ "$choice" == "1" ]; then
         lsblk
-        read -p "Enter drive to wipe (e.g., /dev/sda): " DRIVE
+        DRIVE=$(dialog --inputbox "Enter drive to wipe (e.g., /dev/vda):" $HEIGHT $WIDTH 3>&1 1>&2 2>&3 3>&-)
         parted "$DRIVE" mklabel gpt
-        parted "$DRIVE" mkpart primary ext4 1MiB 100%
-        mkfs.ext4 "${DRIVE}1"
-        mount "${DRIVE}1" /mnt
+        parted "$DRIVE" mkpart primary fat32 1MiB 512MiB
+        parted "$DRIVE" set 1 esp on
+        parted "$DRIVE" mkpart primary ext4 512MiB 100%
+        mkfs.fat -F 32 "${DRIVE}1"
+        mkfs.ext4 "${DRIVE}2"
+        mount "${DRIVE}2" /mnt
+        mkdir -p /mnt/boot
+        mount "${DRIVE}1" /mnt/boot
     fi
 }
 
-# --- Function: User Setup ---
+# Theme selection
+theme_menu() {
+    THEME=$(dialog --menu "Select Hyprland Theme" $HEIGHT $WIDTH 3 \
+        1 "Default Hyprland" \
+        2 "Caelestia" \
+        3 "End-4" 3>&1 1>&2 2>&3 3>&-)
+    echo "THEME=$THEME" > /tmp/obamos_theme
+}
+
+# User Setup
 user_menu() {
     USERNAME=$(dialog --inputbox "Enter Username:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3 3>&-)
     PASSWORD=$(dialog --passwordbox "Set Password:" $HEIGHT $WIDTH 3>&1 1>&2 2>&3 3>&-)
-    
-    # Logic to be executed after config is generated
-    echo "USER_NAME=$USERNAME" > /tmp/obamos_install_info
-    echo "USER_PASS=$PASSWORD" >> /tmp/obamos_install_info
+    echo "USER=$USERNAME" >> /tmp/obamos_install_info
+    echo "PASS=$PASSWORD" >> /tmp/obamos_install_info
 }
 
-# --- Main Logic ---
-dialog --title "ObamOS Installer" --msgbox "Welcome to the ObamOS Setup Utility." $HEIGHT $WIDTH
+dialog --title "ObamOS Setup" --msgbox "Welcome to the ObamOS Installer." $HEIGHT $WIDTH
 partition_menu
+theme_menu
 user_menu
 
-# Final confirmation
-if (dialog --yesno "Ready to install ObamOS?" $HEIGHT $WIDTH); then
-    clear
-    echo "Installing... Please wait."
-    # Here you would trigger nixos-install
+if (dialog --yesno "Proceed with installation?" $HEIGHT $WIDTH); then
+    echo "Generating System..."
+    # Deployment logic would follow here
 else
-    clear
-    echo "Installation aborted."
+    echo "Aborted."
 fi
