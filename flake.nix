@@ -14,25 +14,20 @@
         {
           system.stateVersion = "26.11";
           
+          # Bootloader Branding
+          boot.loader.grub.configurationName = "ObamOS";
+          
           # Core Identity
           networking.hostName = "obamos";
-          
-          # Overwrite /etc/os-release completely
-          environment.etc."os-release" = {
-            text = ''
-              NAME="ObamOS"
-              ID=obamos
-              PRETTY_NAME="ObamOS 1.0"
-              VERSION="1.0"
-            '';
-          };
-
-          # Clear the "Welcome to NixOS" banner
-          environment.etc."issue".text = ''
-            Welcome to ObamOS 1.0
+          environment.etc."os-release".text = ''
+            NAME="ObamOS"
+            ID=obamos
+            PRETTY_NAME="ObamOS 1.0"
+            VERSION="1.0"
           '';
 
-          # Silence NixOS-specific getty banners
+          # Clear the "Welcome" banners
+          environment.etc."issue".text = "Welcome to ObamOS 1.0\n";
           services.getty.helpLine = "Welcome to ObamOS 1.0";
           services.getty.greetingLine = " ";
 
