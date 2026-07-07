@@ -37,7 +37,6 @@
             pkgs.waybar
             pkgs.wofi
             pkgs.kdePackages.dolphin
-            pkgs.sddm
           ];
 
           # Console Font
