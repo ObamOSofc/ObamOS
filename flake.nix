@@ -1,23 +1,22 @@
 {
-  description = "ObamOS - The Custom OS";
+  description = "ObamOS - The Custom OS with Hyprland";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    hyprland.url = "github:hyprwm/Hyprland";
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = { self, nixpkgs, hyprland }: {
     nixosConfigurations.obamos = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         "${nixpkgs}/nixos/modules/installer/cd-dvd/iso-image.nix"
         "${nixpkgs}/nixos/modules/profiles/all-hardware.nix"
+        hyprland.nixosModules.default
         {
           system.stateVersion = "26.11";
           
-          # Bootloader Branding
-          boot.loader.grub.configurationName = "ObamOS";
-          
-          # Core Identity
+          # Branding
           networking.hostName = "obamos";
           environment.etc."os-release".text = ''
             NAME="ObamOS"
@@ -26,23 +25,24 @@
             VERSION="1.0"
           '';
 
-          # Clear the "Welcome" banners
-          environment.etc."issue".text = "Welcome to ObamOS 1.0\n";
-          services.getty.helpLine = "Welcome to ObamOS 1.0";
-          services.getty.greetingLine = " ";
-
-          # Shell Prompt
-          environment.interactiveShellInit = ''
-            export PS1="ObamOS \w \$ "
-          '';
+          # Graphics & Desktop
+          programs.hyprland.enable = true;
+          services.xserver.videoDrivers = [ "modesetting" ];
+          
+          # Wayland Support
+          environment.systemPackages = with nixpkgs.legacyPackages.x86_64-linux; [
+            kitty        # Terminal
+            waybar       # Status bar
+            wofi         # App launcher
+            dolphin      # File manager
+          ];
 
           # Security
           services.getty.autologinUser = null;
           users.users.root.initialHashedPassword = "";
 
-          # Base System
-          boot.plymouth.enable = false;
-          services.xserver.enable = false;
+          # Bootloader
+          boot.loader.grub.configurationName = "ObamOS";
         }
       ];
     };
