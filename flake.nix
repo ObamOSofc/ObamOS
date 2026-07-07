@@ -18,31 +18,30 @@
           
           # Branding
           networking.hostName = "obamos";
-          environment.etc."os-release".text = ''
-            NAME="ObamOS"
-            ID=obamos
-            PRETTY_NAME="ObamOS 1.0"
-            VERSION="1.0"
-          '';
-
-          # Fix the small font in TTY
-          console.font = "Lat2-Terminus16";
           
-          # Graphics & Desktop
+          # Display Manager (The Greeter)
+          services.displayManager.sddm.enable = true;
+          services.displayManager.sddm.wayland.enable = true;
           programs.hyprland.enable = true;
-          services.xserver.videoDrivers = [ "modesetting" ];
-          
-          # Fixed Package List
+
+          # Create a real user
+          users.users.arch = {
+            isNormalUser = true;
+            extraGroups = [ "wheel" "networkmanager" "video" ];
+            initialPassword = "password";
+          };
+
+          # System Packages
           environment.systemPackages = [
             pkgs.kitty
             pkgs.waybar
             pkgs.wofi
             pkgs.kdePackages.dolphin
+            pkgs.sddm
           ];
 
-          # Security
-          services.getty.autologinUser = null;
-          users.users.root.initialHashedPassword = "";
+          # Console Font
+          console.font = "Lat2-Terminus16";
         })
       ];
     };
